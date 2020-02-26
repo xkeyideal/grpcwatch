@@ -1,0 +1,49 @@
+{
+    "version": "2.0.0",
+    "command": "go",
+    "type": "shell",
+    "presentation" : { 
+        "reveal": "always"
+    },
+    "options":{
+        "cwd": "${fileDirname}"
+    },
+    "problemMatcher":[],
+    "tasks": [
+        {
+            "label": "run",
+            "options": {
+                "env": {
+                    "http_proxy": "",
+                    "https_proxy": "",
+                    "all_proxy": "",
+                    "GOPROXY": "https://goproxy.cn"
+                }
+            },
+            "osx": {
+                "args": [
+                    "run",
+                    "${workspaceRoot}/app.go"
+                ]
+            }
+        },
+        {
+            "label": "build",
+            "options": {
+                "cwd": "${fileDirname}",
+                "env": {
+                    "http_proxy": "",
+                    "https_proxy": "",
+                    "all_proxy": "",
+                    "GOPROXY": "https://goproxy.cn"
+                }
+            },
+            "args": [
+                "build",
+                "-v",
+                //"-x",
+                "."
+            ]
+        }
+    ]
+}

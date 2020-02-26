@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package watchpb;
+
+// protoc -I. --go_out=plugins=grpc:./ watchpb.proto
+
+enum EventType {
+    // 新增APP
+    CREATE = 0;
+
+    // APP的服务器地址有更新
+    UPDATE = 1;
+
+    // 删除APP
+    DELETE = 2;
+}
+
+message Empty {}
+
+message GetAppResponse {
+    App app = 1;
+
+    repeated AppServer servers = 2;
+}
+
+message AppServer {
+    // IP
+    string ip = 1;
+
+    // PORT
+    string port = 2;
+}
+
+message App {
+    // 应用名称
+    string name = 1;
+
+    // 环境
+    string env = 2;
+}
+
+message WatchCreateRequest {
+    string watch_id = 1;
+    App app = 2;
+}
+
+message WatchCancelRequest {
+    string watch_id = 1;
+}
+
+message WatchRequest {
+    oneof request_union{
+        WatchCreateRequest create_request = 1;
+        WatchCancelRequest cancel_request = 2;
+    }
+}
+
+message WatchResponse {
+    EventType event = 1;
+
+    App app = 2;
+
+    // 用于服务端标记连接的创建成功
+    bool created = 3;
+
+    // 用于服务端收到客户端取消连接的信号，并处理成功后的返回
+    bool canceled = 4;
+
+    // cancel_reason indicates the reason for canceling the watcher.
+    string cancel_reason = 5;
+
+    repeated AppServer servers = 6;
+}
+
+service WatchRPC {
+    // 获取app的服务器地址
+    rpc GetAppServers(App) returns (GetAppResponse);
+
+    // 推送app服务器地址的变化情况
+    rpc Watch(stream WatchRequest) returns (stream WatchResponse);
+}
