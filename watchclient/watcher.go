@@ -16,7 +16,10 @@ import (
 )
 
 type Watcher struct {
-	remote   pb.WatchRPCClient
+	// gRPC 连接
+	remote pb.WatchRPCClient
+
+	// gRPC call options
 	callOpts []grpc.CallOption
 
 	// mu protects the grpc streams map
@@ -25,6 +28,7 @@ type Watcher struct {
 	// streams holds all the active grpc streams keyed by ctx value.
 	streams map[string]*watchGrpcStream
 
+	// log
 	lg *zap.Logger
 }
 
@@ -125,7 +129,10 @@ func (w *Watcher) Watch(ctx context.Context, watchID string, app *pb.App) chan *
 	w.mu.Unlock()
 
 	ok := false
+
+	// 阻塞等待连接服务端成功，除非调用方主动结束，否则一直重试
 	select {
+	// 连接成功后，发送watch request
 	case wgs.reqc <- wr:
 		ok = true
 	case <-ctx.Done():
@@ -133,6 +140,7 @@ func (w *Watcher) Watch(ctx context.Context, watchID string, app *pb.App) chan *
 		return w.Watch(ctx, watchID, app)
 	}
 
+	// 将watch response channel交给调用方处理
 	if ok {
 		return wgs.respc
 	}

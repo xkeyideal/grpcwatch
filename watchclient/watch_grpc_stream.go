@@ -53,6 +53,7 @@ func (wgs *watchGrpcStream) run() {
 		}
 	}()
 
+	// 尝试连接服务端，若失败会不断的采用回退算法进行重试
 	if wc, closeErr = wgs.newWatchClient(); closeErr != nil {
 		return
 	}
@@ -81,9 +82,12 @@ func (wgs *watchGrpcStream) run() {
 				return
 			}
 
+			// 重试
 			if wc, closeErr = wgs.newWatchClient(); closeErr != nil {
 				return
 			}
+
+			// 重试连接成功后，在此发送 watch request
 			if err := wc.Send(wgs.initReq.(*watchCreateRequest).toPB()); err != nil {
 				wgs.lg.Error("recreatewatch", zap.String("watchID", wgs.watchID), zap.Any("request", wgs.initReq),
 					zap.String("err", err.Error()))
@@ -111,6 +115,7 @@ func (wgs *watchGrpcStream) newWatchClient() (pb.WatchRPC_WatchClient, error) {
 func (wgs *watchGrpcStream) serveWatchClient(wc pb.WatchRPC_WatchClient) {
 	for {
 		resp, err := wc.Recv()
+		// 接收服务端数据的时候，发生错误，需要判断code，进行重试或断开处理
 		if err != nil {
 			select {
 			case wgs.errc <- err:
@@ -149,6 +154,7 @@ func (wgs *watchGrpcStream) openWatchClient() (pb.WatchRPC_WatchClient, error) {
 		}
 
 		// 只有网络不可达的时候才重连
+		// TODO: 此处可以适当的修改，例如追加报警策略等，好让调用方显示的知晓，而非隐式的重试
 		if isUnavailableErr(wgs.ctx, err) {
 			// retry, but backoff
 			if backoff < maxBackoff {

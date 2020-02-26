@@ -34,3 +34,5 @@ gRPC client的负载均衡与分布式锁、选主的封装。
 ### 备注
 
 由于个人能力有限，此用例中可能存在若干bug，还请鉴别使用。
+
+最后给出 [gRPC Codes](https://github.com/xkeyideal/grpcwatch/blob/master/grocodes.md)的个人理解，仅供参考。
