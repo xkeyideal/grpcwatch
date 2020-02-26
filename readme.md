@@ -14,7 +14,11 @@ gRPC watch 的客户端核心程序，代码里有比较详细的中文注释，
 
 ### watchserver目录
 
-gRPC watch 的服务端核心程序，用于mock数据，代码比较简单
+gRPC watch 的服务端核心程序，用于mock数据，代码比较简单。
+
+示例中的代码，只采用了定时的方式固定生成数据，然后通过gRPC server stream发送给客户端。
+在实际的应用场景中，需要与实际的数据存储程序关联在一起，此处的处理逻辑较为复杂，本例未详细实现，
+可参考[Etcd watch server](https://github.com/etcd-io/etcd/blob/master/mvcc/watcher.go)代码。
 
 ### grpclient 目录
 
@@ -35,4 +39,4 @@ gRPC client的负载均衡与分布式锁、选主的封装。
 
 由于个人能力有限，此用例中可能存在若干bug，还请鉴别使用。
 
-最后给出 [gRPC Codes](https://github.com/xkeyideal/grpcwatch/blob/master/grocodes.md)的个人理解，仅供参考。
+最后给出 [gRPC Codes](https://github.com/xkeyideal/grpcwatch/blob/master/grpcodes.md)的个人理解，仅供参考。
