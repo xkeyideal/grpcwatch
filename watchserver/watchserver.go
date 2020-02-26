@@ -5,9 +5,6 @@ import (
 
 	pb "github.com/xkeyideal/grpcwatch/watchpb"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	"go.uber.org/zap"
 )
 
@@ -27,9 +24,6 @@ func NewWatchRpcServer(lg *zap.Logger, watcherStore *watcherStore) *WatchRpcServ
 }
 
 func (s *WatchRpcServer) GetAppServers(ctx context.Context, app *pb.App) (*pb.GetAppResponse, error) {
-
-	return nil, status.Error(codes.NotFound, "xxx")
-
 	return &pb.GetAppResponse{
 		App: &pb.App{
 			Name: "name",

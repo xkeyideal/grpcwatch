@@ -90,7 +90,7 @@ func (w *Watcher) CloseStream(watchID string) {
 	w.mu.Lock()
 	if wgs, ok := w.streams[watchID]; ok {
 		wgs.reqc <- wr
-		close(wgs.donec)
+		wgs.close()
 	}
 	delete(w.streams, watchID)
 	w.mu.Unlock()
