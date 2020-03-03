@@ -13,6 +13,8 @@ import (
 )
 
 type serverWatchStream struct {
+	watchID string
+
 	grpcStream pb.WatchRPC_WatchServer
 
 	watchStream chan *pb.WatchResponse
@@ -69,6 +71,7 @@ func (sws *serverWatchStream) recvLoop() error {
 
 			w := newWatcher(uv.CreateRequest.App, sws.watchStream)
 			sws.watcherStore.createWatch(uv.CreateRequest.WatchId, w)
+			sws.watchID = uv.CreateRequest.WatchId
 		case *pb.WatchRequest_CancelRequest:
 			sws.lg.Info("WatchRequest_CancelRequest", zap.String("watchID", uv.CancelRequest.WatchId))
 

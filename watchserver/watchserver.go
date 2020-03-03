@@ -77,6 +77,7 @@ func (s *WatchRpcServer) Watch(stream pb.WatchRPC_WatchServer) error {
 		err = stream.Context().Err()
 	}
 
+	s.watcherStore.cancelWatch(sws.watchID)
 	sws.close()
 	return err
 }
