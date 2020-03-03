@@ -14,6 +14,7 @@ var maxBackoff = 2000 * time.Millisecond
 
 // GRPC stream管理
 type watchGrpcStream struct {
+	owner    *Watcher
 	remote   pb.WatchRPCClient
 	callOpts []grpc.CallOption
 
@@ -50,6 +51,13 @@ func (wgs *watchGrpcStream) run() {
 	defer func() {
 		if closeErr != nil {
 			wgs.lg.Error("watch_grpc_stream client error closed", zap.String("watchID", wgs.watchID), zap.String("err", closeErr.Error()))
+			// 正常情况下退出，client会主动调用wgs.close(), 触发goroutine run 的退出信号
+			// 只有当closeErr != nil, 异常退出时，才需要如此处理，告知client主动退出
+			wgs.respc <- &pb.WatchResponse{
+				Canceled:     true,
+				CancelReason: closeErr.Error(),
+			}
+			wgs.owner.closeStream(wgs)
 		}
 	}()
 

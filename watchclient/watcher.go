@@ -49,6 +49,7 @@ func NewWatcher(logFilename string, logLevel zapcore.Level, c *grpclient.GrpcCli
 func (w *Watcher) newWatcherGrpcStream(inctx context.Context, watchID string, initReq watchStreamRequest) *watchGrpcStream {
 	ctx, cancel := context.WithCancel(inctx)
 	wgs := &watchGrpcStream{
+		owner:    w,
 		remote:   w.remote,
 		callOpts: w.callOpts,
 		watchID:  watchID,
@@ -97,6 +98,16 @@ func (w *Watcher) CloseStream(watchID string) {
 		wgs.close()
 	}
 	delete(w.streams, watchID)
+	w.mu.Unlock()
+}
+
+func (w *Watcher) closeStream(wgs *watchGrpcStream) {
+	w.mu.Lock()
+	close(wgs.donec)
+	wgs.cancel()
+	if w.streams != nil {
+		delete(w.streams, wgs.watchID)
+	}
 	w.mu.Unlock()
 }
 

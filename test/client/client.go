@@ -53,6 +53,9 @@ func main() {
 			select {
 			case resp := <-ch:
 				fmt.Println(time.Now(), resp)
+				// canceled分为两种情况
+				// 1. 客户端出现异常，处理方案在watchclient/watch_grpc_stream.go 的 run() defer中，此时会主动调用closeStream退出watch steam
+				// 2. 客户端主动发起CancelRequest退出，告知服务端，服务端响应canceled，此情况是发生在客户端调用CloseStream退出watch steam
 				if resp.Canceled {
 					fmt.Println("server canceled", resp.CancelReason)
 					return
@@ -70,6 +73,8 @@ func main() {
 	}()
 
 	time.Sleep(5 * time.Second)
+	// CloseStream做了watchID是否存在的判断
+	// 当出现canceled的case 1时，也不会因为close(wgs.donec)两次出现panic
 	watcherServer.CloseStream("watchertest")
 	time.Sleep(2 * time.Second)
 }
