@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-const scheme = "endpoint"
+const scheme = "grpc-sp-endpoint"
 
 var (
 	targetPrefix = fmt.Sprintf("%s://", scheme)
